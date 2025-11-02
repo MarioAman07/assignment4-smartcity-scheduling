@@ -1,32 +1,24 @@
-package com.example.assignment4.util; // Изменен пакет на util
+package com.example.assignment4.util;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-import com.google.gson.Gson; // Используем Gson из pom.xml
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import java.io.File;
 
-/**
- * Generates graph datasets for Assignment 4.
- * Generates 9 files (Small, Medium, Large) with varied density and cycle presence.
- */
 public class GraphGenerator {
 
     private static final String DATA_DIR = "data/";
     private final Random rand = new Random();
 
-    // --- Вспомогательные классы для JSON-структуры ---
+    private final StringBuilder summaryBuffer = new StringBuilder();
+
     private static class Edge {
         int u;
         int v;
         int w;
-        public Edge(int u, int v, int w) {
-            this.u = u;
-            this.v = v;
-            this.w = w;
-        }
+        public Edge(int u, int v, int w) { this.u = u; this.v = v; this.w = w; }
     }
 
     private static class Graph {
@@ -41,17 +33,15 @@ public class GraphGenerator {
             this.source = source;
         }
     }
-    // --------------------------------------------------
 
     private enum Density { SPARSE, DENSE }
     private enum GraphType { DAG, CYCLIC_SIMPLE, CYCLIC_MULTI_SCC }
 
-    /**
-     * Основной метод для генерации всех 9 датасетов.
-     */
     public void generateAllDatasets() {
-        // Создание папки data, если ее нет
         new File(DATA_DIR).mkdirs();
+
+        summaryBuffer.append("=== SUMMARY OF DATASETS (9 datasets) ===\n");
+        summaryBuffer.append("Filename\t\tn\tedges\tdensity\tcycles\n");
 
         System.out.println("--- Generating 9 Datasets ---");
 
@@ -70,7 +60,8 @@ public class GraphGenerator {
         generateGraph(45, "large_dag_dense.json", GraphType.DAG, Density.DENSE, 0);
         generateGraph(50, "large_cyclic_multi_scc.json", GraphType.CYCLIC_MULTI_SCC, Density.SPARSE, 0);
 
-        System.out.println("--- Generation Complete ---");
+        writeSummaryFile();
+        System.out.println("--- Generation Complete. Summary written to data/DATASET_SUMMARY.txt ---");
     }
 
     private void generateGraph(int n, String filename, GraphType type, Density density, int source) {
@@ -78,53 +69,49 @@ public class GraphGenerator {
         int targetEdges;
 
         if (density == Density.SPARSE) {
-            // Разреженный: E ≈ 1.5 * n (линейно)
             targetEdges = (int) (1.5 * n) + 2;
         } else {
-            // Плотный: E ≈ n^2 / 4 (квадратично)
             targetEdges = Math.min(maxEdges, n * n / 4);
         }
 
         List<Edge> edges = createEdges(n, targetEdges, type);
         Graph graph = new Graph(n, edges, source);
         writeJson(graph, filename);
+
+        double actualDensity = (double) edges.size() / maxEdges;
+        int cycleCount = (type == GraphType.DAG) ? 0 :
+                (type == GraphType.CYCLIC_SIMPLE) ? 1 : 2;
+
+        summaryBuffer.append(String.format("%s\tn=%d\tedges=%d\tdensity=%.2f\tcycles=%d\n",
+                filename, n, edges.size(), actualDensity, cycleCount));
     }
 
     private List<Edge> createEdges(int n, int targetEdges, GraphType type) {
         List<Edge> edges = new ArrayList<>();
         Set<String> existingEdges = new HashSet<>();
 
-        // 1. Создаем минимально необходимый набор ребер для заданного типа
         if (type == GraphType.DAG) {
-            // Для DAG: гарантируем, что u < v, создавая базовую структуру
             for (int i = 0; i < n - 1; i++) {
                 addEdge(edges, existingEdges, i, i + 1, rand.nextInt(10) + 1);
             }
         }
 
-        // 2. Добавляем циклы/множественные SCC, если требуется
         if (type == GraphType.CYCLIC_SIMPLE) {
-            // Создаем цикл 4 узлов
-            int n_minus_1 = n - 1;
             addEdge(edges, existingEdges, 0, 1, rand.nextInt(10) + 1);
             addEdge(edges, existingEdges, 1, 2, rand.nextInt(10) + 1);
-            addEdge(edges, existingEdges, 2, 0, rand.nextInt(10) + 1); // Цикл
+            addEdge(edges, existingEdges, 2, 0, rand.nextInt(10) + 1);
         }
         else if (type == GraphType.CYCLIC_MULTI_SCC) {
-            // Цикл 1
             addEdge(edges, existingEdges, 0, 1, rand.nextInt(10) + 1);
             addEdge(edges, existingEdges, 1, 0, rand.nextInt(10) + 1);
 
-            // Цикл 2
             int mid = n/2;
             addEdge(edges, existingEdges, mid, mid + 1, rand.nextInt(10) + 1);
             addEdge(edges, existingEdges, mid + 1, mid, rand.nextInt(10) + 1);
 
-            // Связываем их, чтобы граф не был полностью разобщенным (0 -> mid)
             addEdge(edges, existingEdges, 2, mid, rand.nextInt(10) + 1);
         }
 
-        // 3. Заполняем оставшиеся ребра до targetEdges
         while (edges.size() < targetEdges) {
             int u = rand.nextInt(n);
             int v = rand.nextInt(n);
@@ -132,7 +119,6 @@ public class GraphGenerator {
             if (u == v) continue;
 
             if (type == GraphType.DAG) {
-                // Строгое условие для DAG
                 if (u >= v) continue;
             }
 
@@ -161,7 +147,15 @@ public class GraphGenerator {
         }
     }
 
-    // Пример вызова для удобства тестирования
+    private void writeSummaryFile() {
+        String filePath = DATA_DIR + "DATASET_SUMMARY.txt";
+        try (FileWriter writer = new FileWriter(filePath)) {
+            writer.write(summaryBuffer.toString());
+        } catch (IOException e) {
+            System.err.println("Error writing summary file: " + e.getMessage());
+        }
+    }
+
     public static void main(String[] args) {
         new GraphGenerator().generateAllDatasets();
     }
