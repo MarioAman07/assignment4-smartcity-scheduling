@@ -24,6 +24,7 @@ public class ComponentGraph {
         return componentToNodes;
     }
 
+
     public Map<Integer, List<Integer>> getAdjList() {
         Map<Integer, List<Integer>> adj = new HashMap<>();
         for (int i = 0; i < numComponents; i++) {
