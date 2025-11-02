@@ -1,4 +1,4 @@
-=== SUMMARY OF DATASETS (9 datasets) ===
+=== DATASET SUMMARY (9 datasets) ===
 Filename		n	edges	density	cycles
 small_dag_sparse.json	n=8	edges=14	density=0,25	cycles=0
 small_dag_dense.json	n=7	edges=12	density=0,29	cycles=0
@@ -8,4 +8,4 @@ medium_cyclic_multi_scc.json	n=12	edges=36	density=0,27	cycles=2
 medium_dag_dense.json	n=20	edges=100	density=0,26	cycles=0
 large_cyclic_sparse.json	n=30	edges=47	density=0,05	cycles=1
 large_dag_dense.json	n=45	edges=506	density=0,26	cycles=0
-large_cyclic_multi_scc.json	n=50	edges=77	density=0,03	cycles=2
+large_cyclic_multi_scc.json	n=50	edges=625	density=0,26	cycles=2

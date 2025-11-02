@@ -20,6 +20,10 @@ public class ComponentGraph {
     public List<Edge> getComponentEdges() { return componentEdges; }
     public List<Integer> getOriginalNodes(int componentId) { return componentToNodes.get(componentId); }
 
+    public Map<Integer, List<Integer>> getOriginalNodesMap() {
+        return componentToNodes;
+    }
+
     public Map<Integer, List<Integer>> getAdjList() {
         Map<Integer, List<Integer>> adj = new HashMap<>();
         for (int i = 0; i < numComponents; i++) {

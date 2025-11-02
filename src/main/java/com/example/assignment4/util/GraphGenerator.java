@@ -1,33 +1,27 @@
 package com.example.assignment4.util;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.example.assignment4.graph.model.Edge;
+
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import java.io.File;
 
 public class GraphGenerator {
 
     private static final String DATA_DIR = "data/";
     private final Random rand = new Random();
-
     private final StringBuilder summaryBuffer = new StringBuilder();
 
-    private static class Edge {
-        int u;
-        int v;
-        int w;
-        public Edge(int u, int v, int w) { this.u = u; this.v = v; this.w = w; }
-    }
-
-    private static class Graph {
+    private static class GraphJson {
         boolean directed = true;
         int n;
         List<Edge> edges;
         int source;
         String weight_model = "edge";
-        public Graph(int n, List<Edge> edges, int source) {
+        public GraphJson(int n, List<Edge> edges, int source) {
             this.n = n;
             this.edges = edges;
             this.source = source;
@@ -37,13 +31,15 @@ public class GraphGenerator {
     private enum Density { SPARSE, DENSE }
     private enum GraphType { DAG, CYCLIC_SIMPLE, CYCLIC_MULTI_SCC }
 
+    private static final int MAX_WEIGHT = 20;
+
     public void generateAllDatasets() {
         new File(DATA_DIR).mkdirs();
 
-        summaryBuffer.append("=== SUMMARY OF DATASETS (9 datasets) ===\n");
+        summaryBuffer.append("=== DATASET SUMMARY (9 datasets) ===\n");
         summaryBuffer.append("Filename\t\tn\tedges\tdensity\tcycles\n");
 
-        System.out.println("--- Generating 9 Datasets ---");
+        System.out.println("--- Regenerating 9 Datasets ---");
 
         // SMALL (n=6-10, 3 variants)
         generateGraph(8, "small_dag_sparse.json", GraphType.DAG, Density.SPARSE, 0);
@@ -58,7 +54,7 @@ public class GraphGenerator {
         // LARGE (n=20-50, 3 variants)
         generateGraph(30, "large_cyclic_sparse.json", GraphType.CYCLIC_SIMPLE, Density.SPARSE, 0);
         generateGraph(45, "large_dag_dense.json", GraphType.DAG, Density.DENSE, 0);
-        generateGraph(50, "large_cyclic_multi_scc.json", GraphType.CYCLIC_MULTI_SCC, Density.SPARSE, 0);
+        generateGraph(50, "large_cyclic_multi_scc.json", GraphType.CYCLIC_MULTI_SCC, Density.DENSE, 0);
 
         writeSummaryFile();
         System.out.println("--- Generation Complete. Summary written to data/DATASET_SUMMARY.txt ---");
@@ -75,7 +71,7 @@ public class GraphGenerator {
         }
 
         List<Edge> edges = createEdges(n, targetEdges, type);
-        Graph graph = new Graph(n, edges, source);
+        GraphJson graph = new GraphJson(n, edges, source);
         writeJson(graph, filename);
 
         double actualDensity = (double) edges.size() / maxEdges;
@@ -90,26 +86,23 @@ public class GraphGenerator {
         List<Edge> edges = new ArrayList<>();
         Set<String> existingEdges = new HashSet<>();
 
-        if (type == GraphType.DAG) {
-            for (int i = 0; i < n - 1; i++) {
-                addEdge(edges, existingEdges, i, i + 1, rand.nextInt(10) + 1);
-            }
+        for (int i = 0; i < n - 1; i++) {
+            addEdge(edges, existingEdges, i, i + 1, rand.nextInt(MAX_WEIGHT) + 1);
         }
 
         if (type == GraphType.CYCLIC_SIMPLE) {
-            addEdge(edges, existingEdges, 0, 1, rand.nextInt(10) + 1);
-            addEdge(edges, existingEdges, 1, 2, rand.nextInt(10) + 1);
-            addEdge(edges, existingEdges, 2, 0, rand.nextInt(10) + 1);
+            addEdge(edges, existingEdges, 0, 1, rand.nextInt(MAX_WEIGHT) + 1);
+            addEdge(edges, existingEdges, 1, 0, rand.nextInt(MAX_WEIGHT) + 1);
         }
         else if (type == GraphType.CYCLIC_MULTI_SCC) {
-            addEdge(edges, existingEdges, 0, 1, rand.nextInt(10) + 1);
-            addEdge(edges, existingEdges, 1, 0, rand.nextInt(10) + 1);
+            addEdge(edges, existingEdges, 0, 1, rand.nextInt(MAX_WEIGHT) + 1);
+            addEdge(edges, existingEdges, 1, 0, rand.nextInt(MAX_WEIGHT) + 1);
 
             int mid = n/2;
-            addEdge(edges, existingEdges, mid, mid + 1, rand.nextInt(10) + 1);
-            addEdge(edges, existingEdges, mid + 1, mid, rand.nextInt(10) + 1);
+            addEdge(edges, existingEdges, mid, mid + 1, rand.nextInt(MAX_WEIGHT) + 1);
+            addEdge(edges, existingEdges, mid + 1, mid, rand.nextInt(MAX_WEIGHT) + 1);
 
-            addEdge(edges, existingEdges, 2, mid, rand.nextInt(10) + 1);
+            addEdge(edges, existingEdges, 2, mid, rand.nextInt(MAX_WEIGHT) + 1);
         }
 
         while (edges.size() < targetEdges) {
@@ -119,10 +112,19 @@ public class GraphGenerator {
             if (u == v) continue;
 
             if (type == GraphType.DAG) {
-                if (u >= v) continue;
             }
 
-            addEdge(edges, existingEdges, u, v, rand.nextInt(10) + 1);
+            addEdge(edges, existingEdges, u, v, rand.nextInt(MAX_WEIGHT) + 1);
+        }
+
+        if (type == GraphType.DAG) {
+            List<Edge> finalEdges = new ArrayList<>();
+            for (Edge edge : edges) {
+                if (edge.getU() != edge.getV()) {
+                    finalEdges.add(edge);
+                }
+            }
+            edges = finalEdges;
         }
 
         return edges;
@@ -136,7 +138,7 @@ public class GraphGenerator {
         }
     }
 
-    private void writeJson(Graph graph, String filename) {
+    private void writeJson(GraphJson graph, String filename) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String filePath = DATA_DIR + filename;
         try (FileWriter writer = new FileWriter(filePath)) {
