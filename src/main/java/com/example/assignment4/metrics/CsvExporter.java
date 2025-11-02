@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class CsvExporter {
 
-    private static final String RESULTS_DIR = "results";
+    private static final String RESULTS_DIR = "data" + File.separator + "output";
     private static final String FILE_NAME = "performance_metrics.csv";
     private static final String CSV_SEPARATOR = ",";
 

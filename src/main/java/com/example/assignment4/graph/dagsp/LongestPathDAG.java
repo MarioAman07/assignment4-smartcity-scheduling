@@ -38,6 +38,15 @@ public class LongestPathDAG {
         Arrays.fill(parent, -1);
     }
 
+    public int findComponentId(int originalNode) {
+        for (int id = 0; id < componentGraph.getNumComponents(); id++) {
+            if (componentGraph.getOriginalNodes(id).contains(originalNode)) {
+                return id;
+            }
+        }
+        return -1;
+    }
+
     public void computeLongestPaths() {
         tracker.startTimer();
 
@@ -95,11 +104,13 @@ public class LongestPathDAG {
         if (endNode != -1) {
             List<Integer> path = reconstructPath(endNode);
             if (!path.isEmpty()) {
+                // Первый элемент в пути - это начало критического пути
                 this.criticalPathStartNode = path.get(0);
             }
         }
     }
 
+    // --- ИСПРАВЛЕННЫЙ МЕТОД РЕКОНСТРУКЦИИ ПУТИ ---
     public List<Integer> reconstructPath(int targetComponent) {
         List<Integer> path = new LinkedList<>();
         if (targetComponent == -1 || dist[targetComponent] == N_INF) {
@@ -107,14 +118,16 @@ public class LongestPathDAG {
         }
 
         int current = targetComponent;
-        while (current != -1 && parent[current] != 0) {
-            path.add(0, current);
-            if (dist[current] == 0) break;
-            current = parent[current];
-        }
 
-        if (current != -1) {
+        // Перемещаемся назад от целевого узла к началу
+        while (current != -1) {
             path.add(0, current);
+
+            // Узел с dist=0 ИЛИ узел, у которого нет предка (parent=-1) - это начало пути
+            if (dist[current] == 0 || parent[current] == -1) {
+                break;
+            }
+            current = parent[current];
         }
 
         return path;
