@@ -16,6 +16,13 @@ public class DirectedGraph {
     private final Map<Integer, List<Edge>> adj;
     private final int sourceNode;
 
+    private static class JsonGraphStructure {
+        int n;
+        List<Edge> edges;
+        int source;
+        String weight_model;
+    }
+
     public DirectedGraph(int n, List<Edge> edges, int sourceNode) {
         this.N = n;
         this.allEdges = edges;
@@ -37,9 +44,11 @@ public class DirectedGraph {
         for (int i = 0; i < n; i++) {
             adj.put(i, new ArrayList<>());
         }
-        for (Edge edge : edges) {
-            if (edge.getU() >= 0 && edge.getU() < n) {
-                adj.get(edge.getU()).add(edge);
+        if (edges != null) {
+            for (Edge edge : edges) {
+                if (edge != null && edge.getU() >= 0 && edge.getU() < n) {
+                    adj.get(edge.getU()).add(edge);
+                }
             }
         }
         return adj;
@@ -49,20 +58,19 @@ public class DirectedGraph {
         Gson gson = new Gson();
         try (JsonReader reader = new JsonReader(new FileReader(filePath))) {
 
-            class JsonGraphStructure {
-                int n;
-                List<Edge> edges;
-                int source;
-                String weight_model;
-            }
-
             JsonGraphStructure jsonGraph = gson.fromJson(reader, JsonGraphStructure.class);
+
+            if (jsonGraph == null) {
+                throw new IOException("JSON content is empty or severely malformed in file: " + filePath);
+            }
 
             if (jsonGraph.n <= 0) {
                 throw new IllegalArgumentException("Graph must have N > 0 nodes.");
             }
 
-            return new DirectedGraph(jsonGraph.n, jsonGraph.edges, jsonGraph.source);
+            List<Edge> edges = (jsonGraph.edges != null) ? jsonGraph.edges : new ArrayList<>();
+
+            return new DirectedGraph(jsonGraph.n, edges, jsonGraph.source);
         }
     }
 }

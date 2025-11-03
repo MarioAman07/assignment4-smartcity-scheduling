@@ -1,0 +1,10 @@
+FILENAME,N_NODES,E_EDGES,SCC_TIME_MS,SCC_DFS_VISITS,SCC_DFS_EDGES,TOPO_TIME_MS,TOPO_DFS_VISITS,DAGSP_TIME_MS,DAGSP_RELAXATIONS,CRITICAL_PATH_LENGTH
+large_cyclic_multi_scc.json,50,625,0.323,50,625,0.015,1,0.008,0,0.0
+large_cyclic_sparse.json,30,47,0.044,30,47,0.002,1,0.003,0,0.0
+large_dag_dense.json,45,506,0.154,45,506,0.318,45,1.446,506,502.0
+medium_cyclic_multi_scc.json,12,36,0.021,12,36,0.002,1,0.002,0,0.0
+medium_dag_dense.json,20,100,0.029,20,100,0.028,20,0.125,100,208.0
+medium_dag_sparse.json,15,24,0.016,15,24,0.012,15,0.031,24,151.0
+small_cyclic_mixed.json,9,15,0.010,9,15,0.003,2,0.003,1,18.0
+small_dag_dense.json,7,12,0.009,7,12,0.007,7,0.012,12,82.0
+small_dag_sparse.json,8,14,0.022,8,14,0.015,8,0.055,14,40.0

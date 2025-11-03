@@ -9,10 +9,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * Implements Single-Source Shortest Path (SSSP) algorithm optimized for Directed Acyclic Graphs (DAGs).
- * The algorithm relies on processing nodes in topological order.
- */
 public class ShortestPathDAG {
 
     private final ComponentGraph componentGraph;
@@ -40,9 +36,6 @@ public class ShortestPathDAG {
         Arrays.fill(parent, -1);
     }
 
-    /**
-     * Finds the Component ID containing the original source node.
-     */
     public int findComponentId(int originalNode) {
         for (int id = 0; id < componentGraph.getNumComponents(); id++) {
             if (componentGraph.getOriginalNodes(id).contains(originalNode)) {
@@ -52,9 +45,6 @@ public class ShortestPathDAG {
         return -1;
     }
 
-    /**
-     * Executes the Shortest Path algorithm on the Component DAG.
-     */
     public void computeShortestPaths() {
         if (sourceComponent == -1) {
             System.err.println("Error: Source node is not part of any component.");
@@ -86,9 +76,6 @@ public class ShortestPathDAG {
         tracker.stopTimer();
     }
 
-    /**
-     * Reconstructs one optimal shortest path from the source to the target component.
-     */
     public List<Integer> reconstructPath(int targetComponent) {
         List<Integer> path = new LinkedList<>();
         if (dist[targetComponent] == INF) {

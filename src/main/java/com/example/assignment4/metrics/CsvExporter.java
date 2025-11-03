@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class CsvExporter {
@@ -45,7 +46,7 @@ public class CsvExporter {
             Object value = result.getOrDefault(header, "");
 
             if (header.contains("TIME_MS") && value instanceof Double) {
-                sb.append(String.format("%.3f", value));
+                sb.append(String.format(Locale.US, "%.3f", value));
             } else {
                 sb.append(value);
             }

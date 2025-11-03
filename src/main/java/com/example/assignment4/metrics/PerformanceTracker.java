@@ -20,7 +20,7 @@ public class PerformanceTracker {
     public void stopTimer() {
         if (this.startTimeNano > 0) {
             this.totalTimeNano = System.nanoTime() - this.startTimeNano;
-            this.startTimeNano = 0; // Сброс таймера
+            this.startTimeNano = 0;
         }
     }
 
@@ -35,16 +35,13 @@ public class PerformanceTracker {
     public Map<String, Object> getResults(String taskName, int N, int E) {
         Map<String, Object> results = new HashMap<>();
 
-        // Basic parameters required for the report
         results.put("TASK_NAME", taskName);
-        results.put("N_NODES", N); // Число узлов
+        results.put("N_NODES", N);
         results.put("E_EDGES", E);
 
-        // Time
         results.put("TIME_NANO", this.totalTimeNano);
-        results.put("TIME_MS", this.totalTimeNano / 1_000_000.0); // Для читаемости в отчете
+        results.put("TIME_MS", this.totalTimeNano / 1_000_000.0);
 
-        // Operation counters
         for (Map.Entry<String, Long> entry : counters.entrySet()) {
             results.put(entry.getKey(), entry.getValue());
         }

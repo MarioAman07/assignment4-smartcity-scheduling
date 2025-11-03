@@ -78,6 +78,9 @@ public class TarjanSCC {
         }
     }
 
+    public List<List<Integer>> getSccs() {
+        return sccs;
+    }
 
     public List<Integer> getSccSizes() {
         List<Integer> sizes = new ArrayList<>();

@@ -22,7 +22,7 @@ public class TopologicalSort {
     }
 
     public List<Integer> computeComponentOrder() {
-        tracker.startTimer(); // Начинаем замер времени
+        tracker.startTimer();
 
         Map<Integer, List<Integer>> adj = componentGraph.getAdjList();
         int N = componentGraph.getNumComponents();

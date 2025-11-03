@@ -22,7 +22,7 @@ class SCCTopoTest {
         return new DirectedGraph(n, edges, 0);
     }
 
-    // --- TESTS FOR SCC ---
+    //TESTS FOR SCC
 
     @Test
     void testPureDAG() {
@@ -73,7 +73,7 @@ class SCCTopoTest {
         assertTrue(sizes.containsAll(Arrays.asList(2, 1, 2)));
     }
 
-    // --- TESTS FOR CONDENSATION GRAPHS AND TOPO SORT ---
+    //TESTS FOR CONDENSATION GRAPHS AND TOPO SORT
 
     @Test
     void testCondensationGraphAndTopoOrder() {
@@ -97,7 +97,7 @@ class SCCTopoTest {
 
         Map<Integer, List<Integer>> componentMap = cGraph.getOriginalNodesMap();
 
-        // --- VALIDITY CHECK OF THE ORDER ---
+        //VALIDITY CHECK OF THE ORDER
 
         assertEquals(5, componentOrder.size()); // 5 компонентов
 

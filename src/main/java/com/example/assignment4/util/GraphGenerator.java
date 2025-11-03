@@ -5,8 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.example.assignment4.graph.model.Edge;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class GraphGenerator {
@@ -112,19 +114,10 @@ public class GraphGenerator {
             if (u == v) continue;
 
             if (type == GraphType.DAG) {
+                if (u >= v) continue;
             }
 
             addEdge(edges, existingEdges, u, v, rand.nextInt(MAX_WEIGHT) + 1);
-        }
-
-        if (type == GraphType.DAG) {
-            List<Edge> finalEdges = new ArrayList<>();
-            for (Edge edge : edges) {
-                if (edge.getU() != edge.getV()) {
-                    finalEdges.add(edge);
-                }
-            }
-            edges = finalEdges;
         }
 
         return edges;
@@ -141,20 +134,24 @@ public class GraphGenerator {
     private void writeJson(GraphJson graph, String filename) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String filePath = DATA_DIR + filename;
-        try (FileWriter writer = new FileWriter(filePath)) {
-            gson.toJson(graph, writer);
+
+        try {
+            String jsonString = gson.toJson(graph);
+
+            Files.writeString(Paths.get(filePath), jsonString, StandardCharsets.UTF_8);
+
             System.out.printf("Generated: %s (N=%d, E=%d)\n", filename, graph.n, graph.edges.size());
         } catch (IOException e) {
-            System.err.println("Error writing JSON file " + filePath + ": " + e.getMessage());
+            System.err.println("CRITICAL ERROR writing JSON file " + filePath + ": " + e.getMessage());
         }
     }
 
     private void writeSummaryFile() {
         String filePath = DATA_DIR + "DATASET_SUMMARY.txt";
-        try (FileWriter writer = new FileWriter(filePath)) {
-            writer.write(summaryBuffer.toString());
+        try {
+            Files.writeString(Paths.get(filePath), summaryBuffer.toString(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            System.err.println("Error writing summary file: " + e.getMessage());
+            System.err.println("CRITICAL ERROR writing summary file: " + e.getMessage());
         }
     }
 
